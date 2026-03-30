@@ -11,7 +11,9 @@ import {
   User,
   TrendingUp,
   Verified,
-  ArrowRight
+  ArrowRight,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { MOCK_ACTORS } from '../mockData';
 import { StatusBadge } from '../components/StatusBadge';
@@ -26,6 +28,7 @@ export const ActorList = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [paginationMode, setPaginationMode] = useState<'1' | '5' | '10' | 'Todo' | 'Custom'>('10');
   const [customInput, setCustomInput] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
   // State for Confirmation Modal
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -49,7 +52,24 @@ export const ActorList = () => {
     return () => window.removeEventListener('smart-search', handleSmartSearch);
   }, []);
 
-  const filteredActors = MOCK_ACTORS.filter(actor => {
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const renderSortIcon = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ChevronUp className="w-3 h-3 opacity-20" />;
+    }
+    return sortConfig.direction === 'asc' 
+      ? <ChevronUp className="w-3 h-3 text-primary" /> 
+      : <ChevronDown className="w-3 h-3 text-primary" />;
+  };
+
+  const filteredActors = [...MOCK_ACTORS].filter(actor => {
     // Tab filter
     const matchesTab = 
       activeTab === 'Todos' || 
@@ -68,6 +88,23 @@ export const ActorList = () => {
       actor.email.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesTab && matchesSearch;
+  }).sort((a, b) => {
+    if (!sortConfig) return 0;
+    
+    const { key, direction } = sortConfig;
+    let valA = a[key as keyof typeof a];
+    let valB = b[key as keyof typeof b];
+
+    if (valA === undefined) valA = '';
+    if (valB === undefined) valB = '';
+
+    if (valA < valB) {
+      return direction === 'asc' ? -1 : 1;
+    }
+    if (valA > valB) {
+      return direction === 'asc' ? 1 : -1;
+    }
+    return 0;
   });
 
   // Calculate counts based on search query for each tab
@@ -103,10 +140,6 @@ export const ActorList = () => {
   const handleTabChange = (tabLabel: string) => {
     setActiveTab(tabLabel);
     setCurrentPage(1);
-    // If "Todo" was active, we need to update itemsPerPage to the new filtered count
-    if (paginationMode === 'Todo') {
-      // We'll handle this in an effect or just recalculate
-    }
   };
 
   // Effect to handle "Todo" mode when filtered list changes
@@ -173,9 +206,33 @@ export const ActorList = () => {
               <tr className="bg-surface-container-low/50">
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Nombre del Actor</th>
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">RUT / ID</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant text-center">Tipo de Entidad</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Rol Principal</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Estado</th>
+                <th 
+                  onClick={() => requestSort('nature')} 
+                  className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant text-center cursor-pointer hover:bg-surface-container-high transition-colors"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    Tipo de Entidad
+                    {renderSortIcon('nature')}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => requestSort('mainRole')} 
+                  className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Rol Principal
+                    {renderSortIcon('mainRole')}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => requestSort('status')} 
+                  className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Estado
+                    {renderSortIcon('status')}
+                  </div>
+                </th>
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant text-right">Acciones</th>
               </tr>
             </thead>
