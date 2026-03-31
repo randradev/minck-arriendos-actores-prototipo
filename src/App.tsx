@@ -21,7 +21,7 @@ const Placeholder = ({ title }: { title: string }) => (
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/minck-arriendos-actores-prototipo-deploy">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<ActorList />} />
