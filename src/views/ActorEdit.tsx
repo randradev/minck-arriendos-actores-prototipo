@@ -25,30 +25,33 @@ import {
   Edit3,
   RotateCcw
 } from 'lucide-react';
-import { MOCK_ACTORS } from '../mockData';
+import { useActors } from '../context/ActorContext';
 import { cn } from '../lib/utils';
 import { StatusManagementDrawer } from '../components/StatusManagementDrawer';
 import { ConfirmationModal } from '../components/ConfirmationModal';
+import { toast } from 'sonner';
 
 export const ActorEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { actors, updateActor, addLog } = useActors();
   
-  // Try to get actor from navigation state first, fallback to mock data
-  const [actor, setActor] = useState(location.state?.actor || MOCK_ACTORS.find(a => a.id === id));
+  // Try to get actor from context
+  const actor = actors.find(a => a.id === id);
   const [loading, setLoading] = useState(!actor);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
-    if (!actor && id) {
-      // Simulate loading if not in state
+    if (!actor) {
+      setLoading(true);
+      // Simulate loading
       const timer = setTimeout(() => {
-        const found = MOCK_ACTORS.find(a => a.id === id);
-        setActor(found);
         setLoading(false);
       }, 500);
       return () => clearTimeout(timer);
+    } else {
+      setLoading(false);
     }
   }, [id, actor]);
 
@@ -78,15 +81,25 @@ export const ActorEdit = () => {
   }, [actor]);
 
   const isDirty = (field: keyof typeof formData) => {
+    if (!actor) return false;
     const originalValue = (actor as any)[field] || '';
     return formData[field] !== originalValue;
   };
 
   const handleReset = (field: keyof typeof formData) => {
+    if (!actor) return;
     setFormData(prev => ({
       ...prev,
       [field]: (actor as any)[field] || ''
     }));
+  };
+
+  const handleSave = () => {
+    if (!actor) return;
+    updateActor(actor.id, formData);
+    addLog(actor.id, { action: 'Información del actor actualizada por Administrador', status: 'success' });
+    toast.success('Cambios guardados correctamente');
+    navigate(`/actor/${actor.id}`);
   };
 
   // State for Confirmation Modal
@@ -192,7 +205,11 @@ export const ActorEdit = () => {
           >
             Cancelar
           </button>
-          <button className="px-6 py-2.5 rounded-xl primary-gradient text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity">
+          <button 
+            onClick={handleSave}
+            disabled={!hasChanges}
+            className="px-6 py-2.5 rounded-xl primary-gradient text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Guardar Cambios
           </button>
         </div>
@@ -633,6 +650,7 @@ export const ActorEdit = () => {
         actor={actor} 
         isOpen={isDrawerOpen} 
         onClose={() => setIsDrawerOpen(false)} 
+        onStatusChange={(newStatus) => updateActor(actor.id, { status: newStatus as any })}
       />
 
       {/* Confirmation Modal */}

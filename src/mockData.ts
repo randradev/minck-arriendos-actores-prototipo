@@ -1,233 +1,236 @@
 import { Actor, Contract, Document, ActivityLog, Notification } from './types';
 
+// Helper para generar fechas coherentes
+const daysAgo = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString();
+};
+
 export const MOCK_ACTORS: Actor[] = [
+  // --- ACTORES ORIGINALES (PRESERVADOS Y MEJORADOS) ---
   {
     id: '1',
     name: 'Juan Pablo Rodríguez Silva',
     rut: '12.345.678-9',
     nature: 'Natural',
     status: 'Activo',
-    email: 'j.rodriguez@email.cl',
-    phone: '+56 9 1234 5678',
+    email: 'jp.rodriguez@email.com',
+    phone: '+56 9 8765 4321',
     mainRole: 'Arrendatario',
     roles: ['Arrendatario', 'Representante Legal'],
     profession: 'Ingeniero Civil',
-    employer: 'Constructora Beta S.A.',
-    createdAt: '2023-01-15T10:00:00Z',
-    updatedAt: '2024-02-20T14:30:00Z',
+    employer: 'Constructora Delta SpA',
+    createdAt: daysAgo(365),
+    updatedAt: daysAgo(10)
   },
   {
     id: '2',
     name: 'Inversiones Los Andes SpA',
-    rut: '76.543.210-K',
+    rut: '76.123.456-K',
     nature: 'Jurídica',
     status: 'Activo',
-    email: 'contacto@losandes-inv.cl',
+    email: 'contacto@losandesinv.cl',
     phone: '+56 2 2345 6789',
-    website: 'https://www.losandes-inv.cl',
+    website: 'www.losandesinv.cl',
     mainRole: 'Arrendador',
     roles: ['Arrendador'],
     entityType: 'SpA',
     legalRepresentativeId: '1',
     legalRepresentativeName: 'Juan Pablo Rodríguez Silva',
-    createdAt: '2022-05-10T09:00:00Z',
-    updatedAt: '2023-11-12T11:15:00Z',
+    createdAt: daysAgo(200),
+    updatedAt: daysAgo(5)
   },
   {
     id: '3',
-    name: 'María Ignacia Valenzuela Soto',
-    rut: '15.678.901-2',
-    nature: 'Natural',
+    name: 'Inversiones Norte S.A.',
+    rut: '96.555.444-3',
+    nature: 'Jurídica',
     status: 'Pendiente',
-    email: 'm.valenzuela@gmail.com',
-    phone: '+56 9 8765 4321',
+    email: 'admin@inorten.cl',
+    phone: '+56 2 2987 6543',
     mainRole: 'Arrendatario',
-    roles: ['Arrendatario', 'Garante'],
-    profession: 'Abogada',
-    employer: 'Estudio Jurídico Valenzuela & Asociados',
-    createdAt: '2024-03-01T15:20:00Z',
-    updatedAt: '2024-03-01T15:20:00Z',
+    roles: ['Arrendatario'],
+    entityType: 'S.A.',
+    legalRepresentativeId: '4',
+    legalRepresentativeName: 'Roberto Carlos Muñoz Herrera',
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(2)
   },
   {
     id: '4',
     name: 'Roberto Carlos Muñoz Herrera',
-    rut: '8.901.234-5',
+    rut: '15.882.341-0',
     nature: 'Natural',
     status: 'Bloqueado',
-    email: 'r.munoz@outlook.cl',
+    email: 'roberto.munoz@freemail.cl',
     phone: '+56 9 5555 4444',
-    mainRole: 'Arrendatario',
-    roles: ['Arrendatario'],
-    profession: 'Comerciante',
+    mainRole: 'Garante',
+    roles: ['Garante', 'Representante Legal'],
+    profession: 'Contador Auditor',
     employer: 'Independiente',
-    createdAt: '2021-08-20T10:00:00Z',
-    updatedAt: '2024-01-05T09:45:00Z',
+    createdAt: daysAgo(150),
+    updatedAt: daysAgo(1)
   },
   {
     id: '5',
-    name: 'Agrícola del Maule Ltda',
-    rut: '77.890.123-4',
-    nature: 'Jurídica',
+    name: 'María José Valenzuela',
+    rut: '18.222.333-4',
+    nature: 'Natural',
     status: 'Activo',
-    email: 'administracion@agricoladelmaule.cl',
-    phone: '+56 75 233 4455',
-    mainRole: 'Arrendador',
-    roles: ['Arrendador'],
-    entityType: 'Ltda',
-    legalRepresentativeId: '6',
-    legalRepresentativeName: 'Carmen Gloria Lagos Ruíz',
-    createdAt: '2020-03-15T08:30:00Z',
-    updatedAt: '2023-12-01T16:00:00Z',
+    email: 'mj.valenzuela@gmail.com',
+    phone: '+56 9 1111 2222',
+    mainRole: 'Arrendatario',
+    roles: ['Arrendatario'],
+    profession: 'Abogada',
+    employer: 'Estudio Jurídico & Asociados',
+    createdAt: daysAgo(400),
+    updatedAt: daysAgo(20)
   },
   {
     id: '6',
-    name: 'Carmen Gloria Lagos Ruíz',
-    rut: '10.234.567-8',
-    nature: 'Natural',
+    name: 'Transportes TransChile Ltda.',
+    rut: '77.888.999-5',
+    nature: 'Jurídica',
     status: 'Activo',
-    email: 'c.lagos@agricoladelmaule.cl',
-    phone: '+56 9 9888 7766',
-    mainRole: 'Representante Legal',
-    roles: ['Representante Legal', 'Aval'],
-    profession: 'Contadora',
-    employer: 'Agrícola del Maule Ltda',
-    createdAt: '2020-03-10T14:00:00Z',
-    updatedAt: '2024-02-10T10:00:00Z',
+    email: 'logistica@transchile.cl',
+    phone: '+56 2 2888 1111',
+    mainRole: 'Arrendatario',
+    roles: ['Arrendatario'],
+    entityType: 'Ltda.',
+    legalRepresentativeId: '5',
+    legalRepresentativeName: 'María José Valenzuela',
+    createdAt: daysAgo(100),
+    updatedAt: daysAgo(5)
   },
   {
     id: '7',
-    name: 'Inmobiliaria El Roble S.A.',
-    rut: '96.321.456-7',
-    nature: 'Jurídica',
+    name: 'Carlos Andrés Vicuña',
+    rut: '10.444.555-6',
+    nature: 'Natural',
     status: 'Archivado',
-    email: 'info@elroblesa.cl',
-    phone: '+56 2 3344 5566',
+    email: 'cvicuna@oldmail.com',
+    phone: '+56 9 3333 4444',
     mainRole: 'Arrendador',
     roles: ['Arrendador'],
-    entityType: 'S.A.',
-    legalRepresentativeId: '8',
-    legalRepresentativeName: 'Andrés Felipe Tagle',
-    createdAt: '2019-11-20T09:00:00Z',
-    updatedAt: '2023-06-30T17:00:00Z',
+    profession: 'Médico',
+    employer: 'Clínica Alemana',
+    createdAt: daysAgo(800),
+    updatedAt: daysAgo(300)
   },
   {
     id: '8',
-    name: 'Andrés Felipe Tagle',
-    rut: '11.456.789-0',
-    nature: 'Natural',
-    status: 'Activo',
-    email: 'a.tagle@inmobiliaria.cl',
-    phone: '+56 9 7766 5544',
-    mainRole: 'Representante Legal',
-    roles: ['Representante Legal'],
-    profession: 'Arquitecto',
-    employer: 'Independiente',
-    createdAt: '2019-11-15T11:00:00Z',
-    updatedAt: '2024-01-20T09:30:00Z',
+    name: 'Servicios Informáticos BitSpA',
+    rut: '76.999.000-1',
+    nature: 'Jurídica',
+    status: 'Pendiente',
+    email: 'info@bitspa.io',
+    phone: '+56 2 2777 0000',
+    mainRole: 'Garante',
+    roles: ['Garante'],
+    entityType: 'SpA',
+    legalRepresentativeId: '9',
+    legalRepresentativeName: 'Lucía Fernanda Rojas',
+    createdAt: daysAgo(10),
+    updatedAt: daysAgo(1)
   },
   {
     id: '9',
-    name: 'Sebastián Ignacio Piñera Echenique',
-    rut: '18.345.678-K',
+    name: 'Lucía Fernanda Rojas',
+    rut: '17.666.777-8',
     nature: 'Natural',
-    status: 'Pendiente',
-    email: 's.pinera@gmail.com',
-    phone: '+56 9 6655 4433',
-    mainRole: 'Garante',
-    roles: ['Garante', 'Aval'],
-    profession: 'Economista',
-    employer: 'Universidad del Desarrollo',
-    createdAt: '2024-03-10T12:00:00Z',
-    updatedAt: '2024-03-10T12:00:00Z',
+    status: 'Activo',
+    email: 'lucia.rojas@bitspa.io',
+    phone: '+56 9 6666 7777',
+    mainRole: 'Representante Legal',
+    roles: ['Representante Legal', 'Aval'],
+    profession: 'Ingeniera de Software',
+    employer: 'Google Chile',
+    createdAt: daysAgo(60),
+    updatedAt: daysAgo(5)
   },
   {
     id: '10',
-    name: 'Transportes Rápidos S.A.',
-    rut: '88.765.432-1',
+    name: 'Inmobiliaria San Pedro E.I.R.L.',
+    rut: '75.222.111-2',
     nature: 'Jurídica',
+    status: 'Bloqueado',
+    email: 'contacto@sanpedro.cl',
+    phone: '+56 2 2444 5555',
+    mainRole: 'Arrendador',
+    roles: ['Arrendador'],
+    entityType: 'E.I.R.L.',
+    legalRepresentativeId: '11',
+    legalRepresentativeName: 'Fernando Tapia Soto',
+    createdAt: daysAgo(500),
+    updatedAt: daysAgo(2)
+  },
+  {
+    id: '11',
+    name: 'Fernando Tapia Soto',
+    rut: '11.333.444-5',
+    nature: 'Natural',
     status: 'Activo',
-    email: 'logistica@transportesrapidos.cl',
-    phone: '+56 2 5566 7788',
-    mainRole: 'Arrendatario',
-    roles: ['Arrendatario', 'Representante Legal'],
-    entityType: 'S.A.',
-    legalRepresentativeId: '1',
-    legalRepresentativeName: 'Juan Pablo Rodríguez Silva',
-    createdAt: '2021-05-20T10:00:00Z',
-    updatedAt: '2024-02-15T11:30:00Z',
+    email: 'f.tapia@email.cl',
+    phone: '+56 9 9900 8888',
+    mainRole: 'Representante Legal',
+    roles: ['Representante Legal'],
+    profession: 'Arquitecto',
+    employer: 'Municipalidad de Providencia',
+    createdAt: daysAgo(600),
+    updatedAt: daysAgo(10)
   }
 ];
 
 export const MOCK_CONTRACTS: Record<string, Contract[]> = {
   '1': [
-    { id: 'C-001', property: 'Departamento 402, Providencia', role: 'Arrendatario', rent: 650000, status: 'Vigente' }
+    { id: 'C-101', property: 'Departamento 402 - Providencia', rent: 550000, status: 'Vigente', role: 'Arrendatario' },
+    { id: 'C-102', property: 'Oficina 1201 - Las Condes', rent: 1200000, status: 'Finalizado', role: 'Arrendatario' }
   ],
   '2': [
-    { id: 'C-002', property: 'Local Comercial 12, Las Condes', role: 'Arrendador', rent: 1200000, status: 'Vigente' }
+    { id: 'C-201', property: 'Bodega Central 05 - Quilicura', rent: 2500000, status: 'Vigente', role: 'Arrendador' },
+    { id: 'C-202', property: 'Local Comercial 14 - Mall Plaza', rent: 3800000, status: 'Vigente', role: 'Arrendador' }
   ],
-  '4': [
-    { id: 'C-003', property: 'Bodega 5, Quilicura', role: 'Arrendatario', rent: 300000, status: 'Finalizado' }
+  '3': [
+    { id: 'C-301', property: 'Terreno Industrial Lote B - Lampa', rent: 4500000, status: 'Vigente', role: 'Arrendatario' }
   ],
-  '5': [
-    { id: 'C-004', property: 'Predio Agrícola, Curicó', role: 'Arrendador', rent: 2500000, status: 'Vigente' }
-  ],
-  '10': [
-    { id: 'C-005', property: 'Oficina 1501, Santiago Centro', role: 'Arrendatario', rent: 1800000, status: 'Vigente' }
+  '6': [
+    { id: 'C-601', property: 'Estacionamiento Flota A - Pudahuel', rent: 900000, status: 'Vigente', role: 'Arrendatario' }
   ]
 };
 
 export const MOCK_DOCS: Record<string, Document[]> = {
   '1': [
-    {
-      id: 'D-101',
-      name: 'Cédula de Identidad',
-      type: 'PDF',
-      size: '1.2 MB',
-      updatedAt: '2024-01-10T14:30:00Z',
-      status: 'Aprobado',
-      versions: [
-        { id: 'V-1', updatedAt: '2023-01-15T10:05:00Z', size: '1.1 MB', type: 'PDF' },
-        { id: 'V-2', updatedAt: '2024-01-10T14:30:00Z', size: '1.2 MB', type: 'PDF' }
-      ]
-    },
-    { id: 'D-102', name: 'Liquidación de Sueldo 1', type: 'PDF', size: '0.8 MB', updatedAt: '2024-02-01T09:00:00Z', status: 'Aprobado' }
-  ],
-  '2': [
-    { id: 'D-201', name: 'Estatutos Sociales', type: 'PDF', size: '5.4 MB', updatedAt: '2022-05-10T11:00:00Z', status: 'Aprobado' },
-    { id: 'D-202', name: 'Certificado de Vigencia', type: 'PDF', size: '2.1 MB', updatedAt: '2023-11-12T10:00:00Z', status: 'Aprobado' }
+    { id: 'D-1', name: 'Cédula de Identidad', type: 'PDF', size: '1.2 MB', updatedAt: '15 Mar 2026', status: 'Aprobado' }
   ],
   '3': [
-    { id: 'D-301', name: 'Cédula de Identidad', type: 'JPG', size: '2.5 MB', updatedAt: '2024-03-01T15:20:00Z', status: 'Pendiente' }
+    { id: 'D-3', name: 'E-RUT (SII)', type: 'PDF', size: '0.8 MB', updatedAt: '28 Mar 2026', status: 'Pendiente' },
+    { id: 'D-4', name: 'Escritura de Constitución', type: 'PDF', size: '4.5 MB', updatedAt: '28 Mar 2026', status: 'Rechazado', rejectionReason: 'Falta timbre de notaría en página 4' }
   ],
   '4': [
-    { id: 'D-401', name: 'Cédula de Identidad', type: 'PDF', size: '1.5 MB', updatedAt: '2021-08-20T10:30:00Z', status: 'Aprobado' },
-    { id: 'D-402', name: 'Certificado de Antecedentes', type: 'PDF', size: '0.5 MB', updatedAt: '2024-01-05T09:00:00Z', status: 'Rechazado', rejectionReason: 'Documento vencido hace más de 30 días.' }
+    { id: 'D-5', name: 'Cédula de Identidad', type: 'JPG', size: '2.1 MB', updatedAt: '10 Feb 2026', status: 'Aprobado' }
   ],
-  '9': [
-    { id: 'D-901', name: 'Cédula de Identidad', type: 'PDF', size: '1.3 MB', updatedAt: '2024-03-10T12:00:00Z', status: 'Pendiente' },
-    { id: 'D-902', name: 'Certificado de Renta', type: 'PDF', size: '0.9 MB', updatedAt: '2024-03-10T12:00:00Z', status: 'Pendiente' }
+  '8': [
+    { id: 'D-8', name: 'Vigencia de Poderes', type: 'PDF', size: '1.5 MB', updatedAt: 'Recién', status: 'Pendiente' }
   ]
 };
 
 export const MOCK_LOGS: Record<string, ActivityLog[]> = {
   '1': [
-    { id: 'L-101', action: 'Creación de actor', timestamp: '2023-01-15T10:00:00Z', status: 'success' },
-    { id: 'L-102', action: 'Documento Cédula Identidad subido', timestamp: '2024-01-10T14:30:00Z', status: 'info' }
-  ],
-  '3': [
-    { id: 'L-301', action: 'Pre-registro online realizado', timestamp: '2024-03-01T15:20:00Z', status: 'info' }
+    { id: 'L-1', action: 'Acceso al portal de pagos', timestamp: 'Hace 2 horas', status: 'info' },
+    { id: 'L-2', action: 'Actualización de correo electrónico', timestamp: 'Hace 2 días', status: 'success' }
   ],
   '4': [
-    { id: 'L-401', action: 'Bloqueo automático de sistema', timestamp: '2024-01-05T09:45:00Z', status: 'error' },
-    { id: 'L-402', action: 'Razón: Bloqueo por comportamiento de pago histórico reportado', timestamp: '2024-01-05T09:46:00Z', status: 'warning' }
+    { id: 'L-3', action: 'Bloqueo preventivo por morosidad en contrato C-105', timestamp: 'Hace 1 día', status: 'warning' },
+    { id: 'L-4', action: 'Intento de carga de documento inválido', timestamp: 'Hace 3 días', status: 'error' }
   ],
   '10': [
-    { id: 'L-1001', action: 'Actualización de representante legal', timestamp: '2024-02-15T11:30:00Z', status: 'success' }
+    { id: 'L-5', action: 'Actor bloqueado por reporte de fraude externo', timestamp: 'Hace 12 horas', status: 'warning' }
   ]
 };
 
 export const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 'N-1', actorName: 'María Ignacia Valenzuela Soto', actorId: '3', reason: 'Documento pendiente de validación: Cédula de Identidad', time: 'hace 2 horas', status: 'nuevo' },
-  { id: 'N-2', actorName: 'Sebastián Ignacio Piñera Echenique', actorId: '9', reason: 'Nuevos documentos cargados para revisión', time: 'hace 1 día', status: 'nuevo' },
-  { id: 'N-3', actorName: 'Roberto Carlos Muñoz Herrera', actorId: '4', reason: 'Alerta de bloqueo de actor en el sistema', time: 'hace 3 días', status: 'visto' }
+  { id: 'N-1', actorName: 'Inversiones Norte S.A.', actorId: '3', reason: 'Tiene documentos rechazados que requieren acción', time: 'Hace 30 min', status: 'nuevo' },
+  { id: 'N-2', actorName: 'Servicios Informáticos BitSpA', actorId: '8', reason: 'Nuevos documentos cargados para revisión', time: 'Hace 1 día', status: 'nuevo' },
+  { id: 'N-3', actorName: 'Roberto Carlos Muñoz Herrera', actorId: '4', reason: 'Alerta de bloqueo de actor en el sistema', time: 'Hace 3 días', status: 'visto' }
 ];

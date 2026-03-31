@@ -11,6 +11,7 @@ import { ActorRegistration } from './views/ActorRegistration';
 import { ActorEdit } from './views/ActorEdit';
 import { Notifications } from './views/Notifications';
 import { ActorHistory } from './views/ActorHistory';
+import { ActorProvider } from './context/ActorContext';
 
 const Placeholder = ({ title }: { title: string }) => (
   <div className="flex flex-col items-center justify-center h-[60vh] text-on-surface-variant">
@@ -21,21 +22,23 @@ const Placeholder = ({ title }: { title: string }) => (
 
 export default function App() {
   return (
-    <BrowserRouter basename="/minck-arriendos-actores-prototipo-deploy">
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<ActorList />} />
-          <Route path="actor/:id" element={<ActorProfile />} />
-          <Route path="actor/:id/history" element={<ActorHistory />} />
-          <Route path="register" element={<ActorRegistration />} />
-          <Route path="actor/:id/edit" element={<ActorEdit />} />
-          <Route path="notificaciones" element={<Notifications />} />
-          <Route path="dashboard" element={<Placeholder title="Dashboard" />} />
-          <Route path="entities" element={<Placeholder title="Entidades" />} />
-          <Route path="reports" element={<Placeholder title="Reportes" />} />
-          <Route path="settings" element={<Placeholder title="Configuración" />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ActorProvider>
+      <BrowserRouter basename="/minck-arriendos-actores-prototipo-deploy">
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<ActorList />} />
+            <Route path="actor/:id" element={<ActorProfile />} />
+            <Route path="actor/:id/history" element={<ActorHistory />} />
+            <Route path="register" element={<ActorRegistration />} />
+            <Route path="actor/:id/edit" element={<ActorEdit />} />
+            <Route path="notificaciones" element={<Notifications />} />
+            <Route path="dashboard" element={<Placeholder title="Dashboard" />} />
+            <Route path="entities" element={<Placeholder title="Entidades" />} />
+            <Route path="reports" element={<Placeholder title="Reportes" />} />
+            <Route path="settings" element={<Placeholder title="Configuración" />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ActorProvider>
   );
 }

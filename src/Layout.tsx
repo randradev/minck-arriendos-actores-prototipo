@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { Toaster } from 'sonner';
+import { Chatbot } from './components/Chatbot';
 
 export const Layout = () => {
   const location = useLocation();
@@ -39,6 +40,7 @@ export const Layout = () => {
         </div>
       </main>
       <Toaster position="top-right" richColors closeButton />
+      <Chatbot />
     </div>
   );
 };

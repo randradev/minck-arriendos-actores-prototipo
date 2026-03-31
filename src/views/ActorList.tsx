@@ -15,13 +15,14 @@ import {
   ChevronUp,
   ChevronDown
 } from 'lucide-react';
-import { MOCK_ACTORS } from '../mockData';
+import { useActors } from '../context/ActorContext';
 import { StatusBadge } from '../components/StatusBadge';
 import { cn, normalizeRut } from '../lib/utils';
 import { ConfirmationModal } from '../components/ConfirmationModal';
 
 export const ActorList = () => {
   const navigate = useNavigate();
+  const { actors: MOCK_ACTORS } = useActors();
   const [activeTab, setActiveTab] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);

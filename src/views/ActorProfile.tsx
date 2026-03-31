@@ -34,11 +34,13 @@ import {
   Shield,
   AlertCircle
 } from 'lucide-react';
-import { MOCK_ACTORS, MOCK_CONTRACTS, MOCK_DOCS, MOCK_LOGS } from '../mockData';
+import { useActors } from '../context/ActorContext';
 import { cn } from '../lib/utils';
 import { Contract, Document } from '../types';
 import { ConfirmationModal } from '../components/ConfirmationModal';
 import { StatusManagementDrawer } from '../components/StatusManagementDrawer';
+
+// ... (Modal components remain the same)
 
 // Simple Modal Component for PDF Preview
 const PDFModal = ({ isOpen, onClose, docName }: { isOpen: boolean, onClose: () => void, docName: string }) => {
@@ -433,7 +435,8 @@ export const ActorProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const actor = MOCK_ACTORS.find(a => a.id === id);
+  const { actors, updateActor, addLog, docs: MOCK_DOCS, logs: MOCK_LOGS, contracts } = useActors();
+  const actor = actors.find(a => a.id === id);
   
   // State for Role Dashboard
   const [activeRoleTab, setActiveRoleTab] = useState(actor?.mainRole || 'Arrendatario');
@@ -446,10 +449,10 @@ export const ActorProfile = () => {
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
 
-  // Workflow State
+  // Workflow State - derived from context when possible, but docs/logs are currently static in context for this prototype
   const [currentDocs, setCurrentDocs] = useState(MOCK_DOCS[actor?.id || ''] || []);
-  const [currentStatus, setCurrentStatus] = useState(actor?.status || 'Pendiente');
-  const [currentLogs, setCurrentLogs] = useState(MOCK_LOGS[actor?.id || ''] || []);
+  const currentStatus = actor?.status || 'Pendiente';
+  const currentLogs = MOCK_LOGS[actor?.id || ''] || [];
 
   // State for Upload Modal
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -602,7 +605,7 @@ export const ActorProfile = () => {
     );
   };
 
-  const allContracts = MOCK_CONTRACTS[actor.id] || [];
+  const allContracts = contracts[actor.id] || [];
 
   // Filter contracts
   const filteredContracts = allContracts.filter(c => 
