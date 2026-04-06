@@ -20,7 +20,7 @@ interface Message {
   content: string;
   timestamp: Date;
   action?: {
-    type: 'nav' | 'update' | 'info';
+    type: 'nav' | 'update' | 'query' | 'none' | 'info';
     label: string;
   };
 }

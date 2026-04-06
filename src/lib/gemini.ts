@@ -1,14 +1,38 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+export const getGeminiApiKey = () => {
+  const savedKey = localStorage.getItem('GEMINI_API_KEY');
+  if (savedKey && savedKey.trim() !== "") {
+    return savedKey;
+  }
+  // @ts-ignore
+  return (import.meta as any).env.VITE_GEMINI_API_KEY || "";
+};
+
+const API_KEY = getGeminiApiKey();
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const geminiModel = genAI.getGenerativeModel({
-  model: "gemini-3-flash-preview",
+  model: "gemini-1.5-flash", // Usamos un modelo estable para el frontend
   generationConfig: {
     responseMimeType: "application/json",
   },
 });
+
+/**
+ * Re-inicializa el modelo con la clave actual de localStorage.
+ * Útil cuando el usuario actualiza la clave en la vista de configuración.
+ */
+export const getUpdatedGeminiModel = () => {
+  const key = getGeminiApiKey();
+  const newGenAI = new GoogleGenerativeAI(key);
+  return newGenAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+    },
+  });
+};
 
 export const SYSTEM_PROMPT = `
 Eres MINCK-PILOT, el copiloto de IA del sistema MINCK. Tu misión es AHORRAR tiempo al usuario ejecutando acciones directamente.

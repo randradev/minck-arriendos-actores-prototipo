@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActors } from '../context/ActorContext';
 import { toast } from 'sonner';
-import { SYSTEM_PROMPT } from '../lib/gemini';
+import { SYSTEM_PROMPT, getGeminiApiKey } from '../lib/gemini';
 
 interface ChatResponse {
   text: string;
@@ -36,12 +36,17 @@ export const useChatAgent = () => {
       }));
 
       const fullPrompt = SYSTEM_PROMPT.replace('{{ACTORS_DATA}}', JSON.stringify(actorsContext, null, 2));
+      const apiKey = getGeminiApiKey();
 
-      // Llamada al PROXY LOCAL en lugar de Google SDK
+      // Siempre usamos el PROXY para evitar CORS y Timeouts en el navegador
       const response = await fetch('http://localhost:3001/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: fullPrompt, message })
+        body: JSON.stringify({ 
+          prompt: fullPrompt, 
+          message,
+          apiKey: apiKey // Enviamos la clave del localStorage al proxy
+        })
       });
 
       if (!response.ok) {
@@ -51,6 +56,7 @@ export const useChatAgent = () => {
 
       const parsedResponse: ChatResponse = await response.json();
 
+      // Procesar acciones si existen
       if (parsedResponse.action) {
         const { type, target, params, label } = parsedResponse.action;
 
@@ -77,7 +83,7 @@ export const useChatAgent = () => {
       setIsProcessing(false);
       
       return {
-        text: `Error de conexión: No pude contactar con el servidor proxy. Asegúrate de que 'node server.js' esté corriendo. (${error.message})`,
+        text: `Error de conexión: No pude procesar tu solicitud a través del proxy. ${error.message.includes('API key') ? 'Verifica tu API Key en Configuración.' : error.message}`,
         action: { type: 'none', label: 'Error' }
       };
     }
