@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActors } from '../context/ActorContext';
 import { toast } from 'sonner';
-import { geminiModel, SYSTEM_PROMPT } from '../lib/gemini';
+import { SYSTEM_PROMPT } from '../lib/gemini';
 
 interface ChatResponse {
   text: string;
@@ -18,20 +18,6 @@ export const useChatAgent = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { actors, updateActor, addLog } = useActors();
   const navigate = useNavigate();
-
-  const callGeminiWithRetry = async (prompt: string, userMsg: string, retries = 2): Promise<string> => {
-    try {
-      const result = await geminiModel.generateContent([prompt, `Usuario: ${userMsg}`]);
-      return result.response.text();
-    } catch (err: any) {
-      if (retries > 0 && (err.message?.includes("fetch") || err.message?.includes("network"))) {
-        console.warn(`Error de red detectado. Reintentando... (${retries} intentos restantes)`);
-        await new Promise(res => setTimeout(resolve => res(null), 1000));
-        return callGeminiWithRetry(prompt, userMsg, retries - 1);
-      }
-      throw err;
-    }
-  };
 
   const processMessage = async (message: string): Promise<ChatResponse> => {
     setIsProcessing(true);
@@ -51,16 +37,19 @@ export const useChatAgent = () => {
 
       const fullPrompt = SYSTEM_PROMPT.replace('{{ACTORS_DATA}}', JSON.stringify(actorsContext, null, 2));
 
-      const responseTextRaw = await callGeminiWithRetry(fullPrompt, message);
-      const responseText = responseTextRaw.replace(/```json/g, '').replace(/```/g, '').trim();
+      // Llamada al PROXY LOCAL en lugar de Google SDK
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: fullPrompt, message })
+      });
 
-      let parsedResponse: ChatResponse;
-      try {
-        parsedResponse = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("JSON Parse Error. Raw response:", responseText);
-        throw new Error("La IA respondió en un formato no válido. Intenta de nuevo.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error en el servidor proxy');
       }
+
+      const parsedResponse: ChatResponse = await response.json();
 
       if (parsedResponse.action) {
         const { type, target, params, label } = parsedResponse.action;
@@ -84,21 +73,11 @@ export const useChatAgent = () => {
       return parsedResponse;
 
     } catch (error: any) {
-      console.error("Gemini Error:", error);
+      console.error("Chat Agent Error:", error);
       setIsProcessing(false);
       
-      let errorMsg = "Lo siento, tuve un problema técnico.";
-      
-      if (error.message?.includes("API_KEY_INVALID")) {
-        errorMsg = "Error: La API KEY es inválida. Revisa tu archivo .env";
-      } else if (error.message?.includes("fetch") || error.message?.includes("Network")) {
-        errorMsg = "Error de conexión: Google AI no responde. Revisa tu internet o si un bloqueador de anuncios está interfiriendo.";
-      } else {
-        errorMsg = `Error: ${error.message || "Ocurrió un error inesperado"}`;
-      }
-
       return {
-        text: errorMsg,
+        text: `Error de conexión: No pude contactar con el servidor proxy. Asegúrate de que 'node server.js' esté corriendo. (${error.message})`,
         action: { type: 'none', label: 'Error' }
       };
     }
