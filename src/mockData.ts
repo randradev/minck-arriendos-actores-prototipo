@@ -36,7 +36,8 @@ export const MOCK_ACTORS: Actor[] = [
     roles: ['Arrendador'],
     entityType: 'SpA',
     legalRepresentatives: [
-      { id: '1', name: 'Juan Pablo Rodríguez Silva', rut: '12.345.678-9', email: 'jp.rodriguez@email.com', phone: '+56 9 8765 4321' }
+      { id: '1', name: 'Juan Pablo Rodríguez Silva', rut: '12.345.678-9', email: 'jp.rodriguez@email.com', phone: '+56 9 8765 4321' },
+      { id: '11', name: 'Fernando Tapia Soto', rut: '11.333.444-5', email: 'f.tapia@email.cl', phone: '+56 9 9900 8888' }
     ],
     createdAt: daysAgo(200),
     updatedAt: daysAgo(5)

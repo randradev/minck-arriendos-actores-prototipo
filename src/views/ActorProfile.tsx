@@ -10,6 +10,7 @@ import {
   Fingerprint, 
   ArrowRight,
   ArrowLeft,
+  UserPlus,
   FileText,
   Download,
   Filter,
@@ -34,6 +35,8 @@ import {
   Shield,
   AlertCircle
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { useActors } from '../context/ActorContext';
 import { cn } from '../lib/utils';
 import { Contract, Document } from '../types';
@@ -496,6 +499,48 @@ export const ActorProfile = () => {
     setIsConfirmModalOpen(true);
   };
 
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [repSearch, setRepSearch] = useState('');
+
+  const handleRemoveRepresentative = (repId: string, repName: string) => {
+    if (!actor) return;
+    
+    const newReps = (actor.legalRepresentatives || []).filter(r => r.id !== repId);
+    updateActor(actor.id, { legalRepresentatives: newReps });
+    addLog(actor.id, { 
+      action: `Eliminado representante legal: ${repName}`, 
+      status: 'warning' 
+    });
+    toast.success('Representante eliminado exitosamente');
+  };
+
+  const handleAddRepresentative = (person: any) => {
+    if (!actor) return;
+    
+    // Check if already exists
+    if ((actor.legalRepresentatives || []).some(r => r.id === person.id)) {
+      toast.error('Este representante ya se encuentra vinculado');
+      return;
+    }
+
+    const newReps = [...(actor.legalRepresentatives || []), {
+      id: person.id,
+      name: person.name,
+      rut: person.rut,
+      email: person.email,
+      phone: person.phone
+    }];
+
+    updateActor(actor.id, { legalRepresentatives: newReps });
+    addLog(actor.id, { 
+      action: `Agregado nuevo representante legal: ${person.name}`, 
+      status: 'success' 
+    });
+    setIsSearchModalOpen(false);
+    setRepSearch('');
+    toast.success('Representante vinculado correctamente');
+  };
+
   // State for Contracts Table
   const [contractSearch, setContractSearch] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -793,19 +838,58 @@ export const ActorProfile = () => {
                 <span className="block text-xs text-on-surface-variant opacity-60">Tipo Entidad</span>
                 <span className="font-semibold text-on-surface">{actor.entityType}</span>
               </div>
-              <div>
-                <span className="block text-xs text-on-surface-variant opacity-60">Representante Legal</span>
-                {actor.legalRepresentatives && actor.legalRepresentatives.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="block text-xs text-on-surface-variant opacity-60">Representantes Legales</span>
                   <button 
-                    onClick={() => navigate(`/actor/${actor.legalRepresentatives![0].id}`)}
-                    className="group flex items-center gap-2 font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer text-left"
+                    onClick={() => setIsSearchModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20 transition-all cursor-pointer"
                   >
-                    {actor.legalRepresentatives[0].name}
-                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                    <Plus className="w-3 h-3" /> Agregar
                   </button>
-                ) : (
-                  <span className="text-sm font-medium text-red-500/70 italic">[Falta asignar Rep. Legal]</span>
-                )}
+                </div>
+                <div className="space-y-2">
+                  {actor.legalRepresentatives && actor.legalRepresentatives.length > 0 ? (
+                    actor.legalRepresentatives.map((rep) => (
+                      <div 
+                        key={rep.id}
+                        className="group flex items-center justify-between w-full p-3 rounded-xl bg-white border border-outline-variant/10 hover:border-primary/20 transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-on-surface">{rep.name}</p>
+                            <p className="text-[10px] text-on-surface-variant font-medium uppercase tracking-tight">{rep.rut}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button 
+                            onClick={() => navigate(`/actor/${rep.id}`)}
+                            className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer"
+                            title="Ver Ficha"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => triggerConfirm(
+                              () => handleRemoveRepresentative(rep.id, rep.name),
+                              'Quitar Representante',
+                              `¿Estás seguro de que deseas desvincular a ${rep.name} como representante legal de esta entidad?`
+                            )}
+                            className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all cursor-pointer"
+                            title="Quitar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-sm font-medium text-red-500/70 italic">[Falta asignar Representantes]</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1649,6 +1733,88 @@ export const ActorProfile = () => {
         variant={confirmAction.variant}
         icon={confirmAction.icon}
       />
+
+      {/* Representative Search Modal */}
+      <AnimatePresence>
+        {isSearchModalOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-on-surface/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-outline-variant/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <UserPlus className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-headline font-bold text-xl text-on-surface">Vincular Representante</h3>
+                </div>
+                <button onClick={() => setIsSearchModalOpen(false)} className="p-2 hover:bg-surface-container-low rounded-full transition-colors cursor-pointer">
+                  <X className="w-5 h-5 text-on-surface-variant" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant/50" />
+                  <input 
+                    type="text"
+                    placeholder="Buscar por nombre o RUT..."
+                    className="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary rounded-2xl pl-12 pr-4 py-3 text-sm transition-all shadow-inner font-sans"
+                    value={repSearch}
+                    onChange={(e) => setRepSearch(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                  {actors
+                    .filter(a => a.nature === 'Natural' && !actor.legalRepresentatives?.some(r => r.id === a.id))
+                    .filter(a => 
+                      a.name.toLowerCase().includes(repSearch.toLowerCase()) || 
+                      a.rut.includes(repSearch)
+                    )
+                    .map(person => (
+                      <button 
+                        key={person.id}
+                        onClick={() => handleAddRepresentative(person)}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-surface hover:bg-primary/5 border border-outline-variant/10 hover:border-primary/20 transition-all text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                            <User className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-on-surface text-sm font-sans">{person.name}</p>
+                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-tight font-sans">{person.rut}</p>
+                          </div>
+                        </div>
+                        <Plus className="w-4 h-4 text-primary" />
+                      </button>
+                    ))
+                  }
+                  {repSearch && actors.filter(a => a.nature === 'Natural' && (a.name.toLowerCase().includes(repSearch.toLowerCase()) || a.rut.includes(repSearch))).length === 0 && (
+                    <div className="p-8 text-center bg-surface-container-low/30 rounded-2xl border border-dashed border-outline-variant/50">
+                      <p className="text-sm text-on-surface-variant font-medium font-sans">No se encontraron resultados</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="p-6 bg-surface-container-low/50 flex justify-end gap-3">
+                <button 
+                  onClick={() => setIsSearchModalOpen(false)}
+                  className="px-6 py-2 rounded-xl text-sm font-bold text-on-surface-variant hover:bg-surface-container-low transition-all cursor-pointer font-sans"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <RejectionModal 
         isOpen={isRejectionModalOpen}

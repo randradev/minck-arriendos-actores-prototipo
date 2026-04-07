@@ -23,8 +23,11 @@ import {
   AlertTriangle,
   History,
   Edit3,
-  RotateCcw
+  RotateCcw,
+  Plus,
+  X
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useActors } from '../context/ActorContext';
 import { cn } from '../lib/utils';
 import { StatusManagementDrawer } from '../components/StatusManagementDrawer';
@@ -62,7 +65,8 @@ export const ActorEdit = () => {
     phone: '',
     website: '',
     profession: '',
-    entityType: ''
+    entityType: '',
+    legalRepresentatives: [] as any[]
   });
 
   useEffect(() => {
@@ -73,7 +77,8 @@ export const ActorEdit = () => {
         phone: actor.phone,
         website: actor.website || '',
         profession: actor.profession || '',
-        entityType: actor.entityType || (actor.nature === 'Natural' ? 'Persona Natural' : 'Sociedad por Acciones (SpA)')
+        entityType: actor.entityType || (actor.nature === 'Natural' ? 'Persona Natural' : 'Sociedad por Acciones (SpA)'),
+        legalRepresentatives: actor.legalRepresentatives || []
       });
     }
   }, [actor]);
@@ -114,6 +119,8 @@ export const ActorEdit = () => {
   // Navigation Guard State
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | number | null>(null);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [repSearch, setRepSearch] = useState('');
 
   const hasChanges = Object.keys(formData).some(key => isDirty(key as keyof typeof formData));
 
@@ -445,7 +452,6 @@ export const ActorEdit = () => {
             </div>
           </section>
 
-          {/* Section: Representante Legal (Only for Juridical) */}
           {actor.nature === 'Jurídica' && (
             <section className="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/10">
               <div className="flex items-center justify-between mb-8">
@@ -453,32 +459,58 @@ export const ActorEdit = () => {
                   <div className="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
                     <Shield className="w-4 h-4" />
                   </div>
-                  <h3 className="text-xl font-bold font-headline">Representante Legal</h3>
+                  <h3 className="text-xl font-bold font-headline">Representantes Legales</h3>
                 </div>
+                <button 
+                  onClick={() => setIsSearchModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Agregar
+                </button>
               </div>
-              <div className="p-5 rounded-2xl border border-dashed border-outline-variant bg-surface-container-low flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
-                    <User className="w-6 h-6" />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.legalRepresentatives.length > 0 ? (
+                  formData.legalRepresentatives.map((rep: any) => (
+                    <div key={rep.id} className="p-4 rounded-2xl border border-outline-variant bg-surface-container-low flex items-center justify-between hover:border-primary/30 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-on-surface">{rep.name}</p>
+                          <p className="text-[10px] text-on-surface-variant font-medium">RUT: {rep.rut}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button 
+                          onClick={() => navigate(`/actor/${rep.id}`)}
+                          className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                          title="Ver Ficha"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              legalRepresentatives: prev.legalRepresentatives.filter((r: any) => r.id !== rep.id)
+                            }));
+                          }}
+                          className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 p-8 text-center border-2 border-dashed border-outline-variant/30 rounded-2xl bg-surface-container-low/30">
+                    <p className="text-sm text-on-surface-variant italic font-medium">No hay representantes legales asignados.</p>
                   </div>
-                  <div>
-                    <p className="font-bold text-on-surface">{actor.legalRepresentatives?.[0]?.name || '[Sin Representante]'}</p>
-                    <p className="text-xs text-on-surface-variant">RUT: {actor.legalRepresentatives?.[0]?.rut || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => actor.legalRepresentatives?.[0]?.id && navigate(`/actor/${actor.legalRepresentatives[0].id}`)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-on-surface text-sm font-bold shadow-sm border border-outline-variant hover:bg-surface-container-low transition-all cursor-pointer"
-                  >
-                    <Eye className="w-4 h-4" />
-                    Ver Ficha
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-sm border border-outline-variant hover:bg-primary-fixed/10 transition-colors">
-                    <Search className="w-4 h-4" />
-                    Cambiar
-                  </button>
-                </div>
+                )}
               </div>
             </section>
           )}
@@ -618,6 +650,96 @@ export const ActorEdit = () => {
         title={confirmAction.title}
         message={confirmAction.message}
       />
+
+      {/* Representative Search Modal */}
+      <AnimatePresence>
+        {isSearchModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-on-surface/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-outline-variant/10 flex items-center justify-between">
+                <h3 className="font-headline font-bold text-xl text-on-surface">Agregar Representante Legal</h3>
+                <button onClick={() => setIsSearchModalOpen(false)} className="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+                  <X className="w-5 h-5 text-on-surface-variant" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant/50" />
+                  <input 
+                    type="text"
+                    placeholder="Buscar por nombre o RUT..."
+                    className="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary rounded-2xl pl-12 pr-4 py-3 text-sm transition-all shadow-inner font-sans"
+                    value={repSearch}
+                    onChange={(e) => setRepSearch(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                  {actors
+                    .filter(a => a.nature === 'Natural' && !formData.legalRepresentatives.some((r: any) => r.id === a.id))
+                    .filter(a => 
+                      a.name.toLowerCase().includes(repSearch.toLowerCase()) || 
+                      a.rut.includes(repSearch)
+                    )
+                    .map(person => (
+                      <button 
+                        key={person.id}
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            legalRepresentatives: [...prev.legalRepresentatives, {
+                              id: person.id,
+                              name: person.name,
+                              rut: person.rut,
+                              email: person.email,
+                              phone: person.phone
+                            }]
+                          }));
+                          setIsSearchModalOpen(false);
+                          setRepSearch('');
+                        }}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-surface hover:bg-primary/5 border border-outline-variant/10 hover:border-primary/20 transition-all text-left"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                            <User className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-on-surface text-sm font-sans">{person.name}</p>
+                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-tight font-sans">{person.rut}</p>
+                          </div>
+                        </div>
+                        <Plus className="w-4 h-4 text-primary" />
+                      </button>
+                    ))
+                  }
+                  {repSearch && actors.filter(a => a.nature === 'Natural' && (a.name.toLowerCase().includes(repSearch.toLowerCase()) || a.rut.includes(repSearch))).length === 0 && (
+                    <div className="p-8 text-center bg-surface-container-low/30 rounded-2xl border border-dashed border-outline-variant/50">
+                      <p className="text-sm text-on-surface-variant font-medium font-sans">No se encontraron resultados</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="p-6 bg-surface-container-low/50 flex justify-end gap-3">
+                <button 
+                  onClick={() => setIsSearchModalOpen(false)}
+                  className="px-6 py-2 rounded-xl text-sm font-bold text-on-surface-variant hover:bg-surface-container-low transition-all font-sans"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Exit Warning Modal */}
       <ConfirmationModal 

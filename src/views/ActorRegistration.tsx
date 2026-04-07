@@ -90,7 +90,7 @@ export const ActorRegistration = () => {
   const [naturalPersons, setNaturalPersons] = useState(INITIAL_NATURAL_PERSONS);
   const [repSearch, setRepSearch] = useState('');
   const [showRepResults, setShowRepResults] = useState(false);
-  const [selectedRep, setSelectedRep] = useState<{ name: string; rut: string } | null>(null);
+  const [selectedReps, setSelectedReps] = useState<{ id?: string, name: string; rut: string }[]>([]);
   const [showNotFoundAlert, setShowNotFoundAlert] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -107,7 +107,7 @@ export const ActorRegistration = () => {
 
   // Navigation Guard State
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
-  const isFormDirty = mainDocNumber.trim() !== '' || mainName.trim() !== '' || Object.keys(uploadedDocs).length > 0 || selectedRep !== null;
+  const isFormDirty = mainDocNumber.trim() !== '' || mainName.trim() !== '' || Object.keys(uploadedDocs).length > 0 || selectedReps.length > 0;
 
   const handleExitAttempt = () => {
     if (isFormDirty) {
@@ -153,16 +153,14 @@ export const ActorRegistration = () => {
   const handleRepSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = formatRut(e.target.value);
     setRepSearch(val);
-    setSelectedRep(null);
     
     // Trigger search logic
     const exactMatch = naturalPersons.find(p => p.rut === val);
     const partialMatches = naturalPersons.filter(p => p.rut.startsWith(val) || p.name.toLowerCase().includes(val.toLowerCase()));
 
     if (exactMatch) {
-      setShowRepResults(false);
+      setShowRepResults(true); // Keep it open to allow clicking to add
       setShowNotFoundAlert(false);
-      setSelectedRep({ name: exactMatch.name, rut: exactMatch.rut });
     } else if (val.length > 0) {
       if (partialMatches.length > 0) {
         setShowRepResults(true);
@@ -177,9 +175,12 @@ export const ActorRegistration = () => {
     }
   };
 
-  const selectRep = (person: typeof INITIAL_NATURAL_PERSONS[0]) => {
-    setSelectedRep({ name: person.name, rut: person.rut });
-    setRepSearch(person.rut);
+  const selectRep = (person: any) => {
+    // Check if already added
+    if (!selectedReps.find(r => r.rut === person.rut)) {
+      setSelectedReps(prev => [...prev, { id: person.id, name: person.name, rut: person.rut }]);
+    }
+    setRepSearch('');
     setShowRepResults(false);
     setShowNotFoundAlert(false);
   };
@@ -216,9 +217,11 @@ export const ActorRegistration = () => {
     };
     setNaturalPersons([...naturalPersons, newPerson]);
     
-    // Auto-assign
-    setSelectedRep({ name: newPerson.name, rut: newPerson.rut });
-    setRepSearch(newPerson.rut);
+    // Auto-assign to the array of representatives
+    if (!selectedReps.find(r => r.rut === newPerson.rut)) {
+      setSelectedReps([...selectedReps, { id: newPerson.id, name: newPerson.name, rut: newPerson.rut }]);
+    }
+    setRepSearch('');
     setIsModalOpen(false);
     setShowNotFoundAlert(false);
 
@@ -231,7 +234,7 @@ export const ActorRegistration = () => {
   const isFormValid = () => {
     const basicValid = mainDocNumber.trim() !== '' && mainName.trim() !== '';
     if (nature === 'Jurídica') {
-      return basicValid && selectedRep !== null;
+      return basicValid && selectedReps.length > 0;
     }
     return basicValid;
   };
@@ -496,13 +499,13 @@ export const ActorRegistration = () => {
                         onChange={handleRepSearchChange}
                         className={cn(
                           "w-full bg-surface-container-low border-0 border-b-2 focus:border-primary focus:ring-0 rounded-t-xl text-sm px-4 py-3 pr-12 transition-colors font-sans",
-                          selectedRep ? "text-primary font-bold border-transparent" : (attemptedSubmit && nature === 'Jurídica' ? "border-error bg-error/5" : "border-transparent")
+                          attemptedSubmit && nature === 'Jurídica' && selectedReps.length === 0 ? "border-error bg-error/5" : "border-transparent"
                         )}
                         placeholder="15.882.341-0"
                         type="text"
                       />
                       <div className="absolute right-4 top-3 flex items-center gap-2">
-                        {selectedRep ? (
+                        {selectedReps.length > 0 ? (
                           <CheckCircle2 className="w-4 h-4 text-primary" />
                         ) : (
                           <Search className="w-4 h-4 text-on-surface-variant" />
@@ -536,23 +539,35 @@ export const ActorRegistration = () => {
                       )}
                     </AnimatePresence>
 
-                    {/* Selected Representative Display */}
-                    {selectedRep && (
-                      <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-primary/5 rounded-lg border border-primary/20 animate-in fade-in zoom-in duration-300">
-                        <User className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-xs font-bold text-primary font-sans">Vínculo: {selectedRep.name}</span>
-                        <button 
-                          onClick={() => { setSelectedRep(null); setRepSearch(''); }}
-                          className="ml-auto text-on-surface-variant hover:text-error transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                    {/* Selected Representatives Display */}
+                    {selectedReps.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">Representantes Seleccionados</label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {selectedReps.map((rep, idx) => (
+                            <div key={idx} className="flex items-center gap-3 px-3 py-2 bg-primary/5 rounded-xl border border-primary/10 animate-in fade-in zoom-in duration-300">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                <User className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-primary truncate font-sans">{rep.name}</p>
+                                <p className="text-[10px] text-primary/60 font-medium font-sans">{rep.rut}</p>
+                              </div>
+                              <button 
+                                onClick={() => setSelectedReps(prev => prev.filter((_, i) => i !== idx))}
+                                className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/5 rounded-full transition-colors"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* Not Found Alert */}
                     <AnimatePresence>
-                      {showNotFoundAlert && !selectedRep && (
+                      {showNotFoundAlert && (
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
