@@ -8,9 +8,14 @@ import { Actor, Notification } from '../types';
 interface TopBarProps {
   breadcrumbs: { label: string; href?: string }[];
   showSearch?: boolean;
+  searchPlaceholder?: string;
 }
 
-export const TopBar = ({ breadcrumbs: initialBreadcrumbs, showSearch = false }: TopBarProps) => {
+export const TopBar = ({ 
+  breadcrumbs: initialBreadcrumbs, 
+  showSearch = false,
+  searchPlaceholder = "Filtrar por nombre, RUT, o entidad..."
+}: TopBarProps) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);

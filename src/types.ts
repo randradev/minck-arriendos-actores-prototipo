@@ -2,6 +2,14 @@ export type EntityNature = 'Natural' | 'Jurídica';
 export type ActorStatus = 'Activo' | 'Pendiente' | 'Bloqueado' | 'Archivado';
 export type ActorRole = 'Arrendatario' | 'Arrendador' | 'Garante' | 'Representante Legal' | 'Aval';
 
+export interface LegalRepresentativeReference {
+  id: string;
+  name: string;
+  rut: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface Actor {
   id: string;
   name: string;
@@ -15,10 +23,8 @@ export interface Actor {
   roles: ActorRole[];
   // Specific fields
   profession?: string;
-  employer?: string;
   entityType?: string;
-  legalRepresentativeId?: string;
-  legalRepresentativeName?: string;
+  legalRepresentatives?: LegalRepresentativeReference[];
   representedCompanyId?: string;
   representedCompanyName?: string;
   createdAt: string;

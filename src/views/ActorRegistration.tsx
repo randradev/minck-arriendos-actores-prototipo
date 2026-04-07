@@ -72,6 +72,7 @@ export const ActorRegistration = () => {
   // Main Form State
   const [mainDocNumber, setMainDocNumber] = useState('');
   const [mainName, setMainName] = useState('');
+  const [profession, setProfession] = useState('');
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
   // Toast State
@@ -462,7 +463,18 @@ export const ActorRegistration = () => {
             Atributos Específicos ({nature})
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            {nature === 'Jurídica' ? (
+            {nature === 'Natural' ? (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-on-surface-variant px-1 uppercase tracking-wider">Profesión</label>
+                <input 
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  className="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-t-xl text-sm px-4 py-3 transition-colors" 
+                  placeholder="Ej: Ingeniero Civil"
+                  type="text"
+                />
+              </div>
+            ) : (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold text-on-surface-variant px-1 uppercase tracking-wider">Tipo de entidad</label>
@@ -566,28 +578,10 @@ export const ActorRegistration = () => {
                   </div>
                 </div>
               </>
-            ) : (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-on-surface-variant px-1 uppercase tracking-wider">Profesión u oficio</label>
-                  <input 
-                    className="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-t-xl text-sm px-4 py-3 transition-colors" 
-                    placeholder="Ej: Diseñador Industrial"
-                    type="text"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-on-surface-variant px-1 uppercase tracking-wider">Empleador</label>
-                  <input 
-                    className="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-t-xl text-sm px-4 py-3 transition-colors" 
-                    placeholder="Nombre de la empresa o institución"
-                    type="text"
-                  />
-                </div>
-              </>
             )}
           </div>
         </section>
+
 
         {/* Section 4: Optional Documentation */}
         <section className="space-y-6">
@@ -907,7 +901,7 @@ export const ActorRegistration = () => {
                         "w-10 h-10 rounded-full flex items-center justify-center",
                         tempFile ? "bg-primary text-white" : "bg-white text-on-surface-variant"
                       )}>
-                        {tempFile ? <CheckCircle2 className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+                        {tempFile ? <CheckCircle2 className="w-4 h-4" /> : <UserPlus className="w-5 h-5" />}
                       </div>
                       <div className="text-center">
                         <p className="text-sm font-bold text-on-surface">
@@ -957,7 +951,6 @@ export const ActorRegistration = () => {
         )}
       </AnimatePresence>
 
-      {/* Footer Actions */}
       {/* Footer Actions */}
       <div className="max-w-5xl mx-auto flex items-center justify-between">
         <button 

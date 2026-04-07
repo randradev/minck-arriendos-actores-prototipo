@@ -13,7 +13,7 @@
 El sistema separa entidades por Naturaleza. La IA debe respetar estas restricciones en CADA línea de código:
 
 ## A. ENTIDAD NATURAL (Persona Física)
-- Atributos obligatorios: 'profession' (Profesión), 'employer' (Empleador).
+- Atributos obligatorios: 'profession' (Profesión).
 - Prohibición: No puede tener 'entityType' ni 'legalRepresentativeId'.
 - Roles comunes: Arrendatario, Aval, Representante Legal (de una Jurídica).
 

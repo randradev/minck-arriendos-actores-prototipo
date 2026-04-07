@@ -20,7 +20,6 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendatario',
     roles: ['Arrendatario', 'Representante Legal'],
     profession: 'Ingeniero Civil',
-    employer: 'Constructora Delta SpA',
     createdAt: daysAgo(365),
     updatedAt: daysAgo(10)
   },
@@ -36,8 +35,9 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendador',
     roles: ['Arrendador'],
     entityType: 'SpA',
-    legalRepresentativeId: '1',
-    legalRepresentativeName: 'Juan Pablo Rodríguez Silva',
+    legalRepresentatives: [
+      { id: '1', name: 'Juan Pablo Rodríguez Silva', rut: '12.345.678-9', email: 'jp.rodriguez@email.com', phone: '+56 9 8765 4321' }
+    ],
     createdAt: daysAgo(200),
     updatedAt: daysAgo(5)
   },
@@ -52,8 +52,9 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendatario',
     roles: ['Arrendatario'],
     entityType: 'S.A.',
-    legalRepresentativeId: '4',
-    legalRepresentativeName: 'Roberto Carlos Muñoz Herrera',
+    legalRepresentatives: [
+      { id: '4', name: 'Roberto Carlos Muñoz Herrera', rut: '15.882.341-0', email: 'roberto.munoz@freemail.cl', phone: '+56 9 5555 4444' }
+    ],
     createdAt: daysAgo(30),
     updatedAt: daysAgo(2)
   },
@@ -68,7 +69,6 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Garante',
     roles: ['Garante', 'Representante Legal'],
     profession: 'Contador Auditor',
-    employer: 'Independiente',
     createdAt: daysAgo(150),
     updatedAt: daysAgo(1)
   },
@@ -83,7 +83,6 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendatario',
     roles: ['Arrendatario'],
     profession: 'Abogada',
-    employer: 'Estudio Jurídico & Asociados',
     createdAt: daysAgo(400),
     updatedAt: daysAgo(20)
   },
@@ -98,8 +97,9 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendatario',
     roles: ['Arrendatario'],
     entityType: 'Ltda.',
-    legalRepresentativeId: '5',
-    legalRepresentativeName: 'María José Valenzuela',
+    legalRepresentatives: [
+      { id: '5', name: 'María José Valenzuela', rut: '18.222.333-4', email: 'mj.valenzuela@gmail.com', phone: '+56 9 1111 2222' }
+    ],
     createdAt: daysAgo(100),
     updatedAt: daysAgo(5)
   },
@@ -114,7 +114,6 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendador',
     roles: ['Arrendador'],
     profession: 'Médico',
-    employer: 'Clínica Alemana',
     createdAt: daysAgo(800),
     updatedAt: daysAgo(300)
   },
@@ -129,8 +128,9 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Garante',
     roles: ['Garante'],
     entityType: 'SpA',
-    legalRepresentativeId: '9',
-    legalRepresentativeName: 'Lucía Fernanda Rojas',
+    legalRepresentatives: [
+      { id: '9', name: 'Lucía Fernanda Rojas', rut: '17.666.777-8', email: 'lucia.rojas@bitspa.io', phone: '+56 9 6666 7777' }
+    ],
     createdAt: daysAgo(10),
     updatedAt: daysAgo(1)
   },
@@ -145,7 +145,6 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Representante Legal',
     roles: ['Representante Legal', 'Aval'],
     profession: 'Ingeniera de Software',
-    employer: 'Google Chile',
     createdAt: daysAgo(60),
     updatedAt: daysAgo(5)
   },
@@ -160,8 +159,9 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Arrendador',
     roles: ['Arrendador'],
     entityType: 'E.I.R.L.',
-    legalRepresentativeId: '11',
-    legalRepresentativeName: 'Fernando Tapia Soto',
+    legalRepresentatives: [
+      { id: '11', name: 'Fernando Tapia Soto', rut: '11.333.444-5', email: 'f.tapia@email.cl', phone: '+56 9 9900 8888' }
+    ],
     createdAt: daysAgo(500),
     updatedAt: daysAgo(2)
   },
@@ -176,7 +176,6 @@ export const MOCK_ACTORS: Actor[] = [
     mainRole: 'Representante Legal',
     roles: ['Representante Legal'],
     profession: 'Arquitecto',
-    employer: 'Municipalidad de Providencia',
     createdAt: daysAgo(600),
     updatedAt: daysAgo(10)
   }

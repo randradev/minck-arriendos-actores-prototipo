@@ -451,8 +451,8 @@ export const ActorProfile = () => {
 
   // Workflow State - derived from context when possible, but docs/logs are currently static in context for this prototype
   const [currentDocs, setCurrentDocs] = useState(MOCK_DOCS[actor?.id || ''] || []);
-  const currentStatus = actor?.status || 'Pendiente';
-  const currentLogs = MOCK_LOGS[actor?.id || ''] || [];
+  const [currentStatus, setCurrentStatus] = useState(actor?.status || 'Pendiente');
+  const [currentLogs, setCurrentLogs] = useState(MOCK_LOGS[actor?.id || ''] || []);
 
   // State for Upload Modal
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -753,6 +753,9 @@ export const ActorProfile = () => {
                 </div>
                 <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-on-surface-variant font-medium text-sm">
                   <span className="flex items-center gap-1"><Fingerprint className="w-4 h-4" /> RUT {actor.rut}</span>
+                  {actor.nature === 'Natural' && actor.profession && (
+                    <span className="flex items-center gap-1"><Briefcase className="w-4 h-4 text-on-surface-variant/70" /> {actor.profession}</span>
+                  )}
                   <span className={cn(
                     "px-3 py-0.5 text-[11px] font-semibold rounded-full uppercase tracking-wide",
                     actor.nature === 'Jurídica' ? "bg-primary-fixed text-on-primary-fixed-variant" : "bg-secondary-container text-on-secondary-container"
@@ -778,60 +781,36 @@ export const ActorProfile = () => {
                 </div>
           </section>
 
-        {/* Datos de Origen */}
-        <div className="bg-surface-container-low rounded-xl p-6">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-4">Datos de Origen</h3>
-          <div className={cn(
-            "grid gap-6",
-            actor.nature === 'Jurídica' ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-3"
-          )}>
-            {actor.nature === 'Jurídica' ? (
-              <>
-                <div>
-                  <span className="block text-xs text-on-surface-variant opacity-60">Tipo Entidad</span>
-                  <span className="font-semibold text-on-surface">{actor.entityType}</span>
-                </div>
-                <div>
-                  <span className="block text-xs text-on-surface-variant opacity-60">Representante Legal</span>
-                  {actor.legalRepresentativeName ? (
-                    <button 
-                      onClick={() => actor.legalRepresentativeId && navigate(`/actor/${actor.legalRepresentativeId}`)}
-                      className="group flex items-center gap-2 font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer text-left"
-                    >
-                      {actor.legalRepresentativeName}
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  ) : (
-                    <span className="text-sm font-medium text-red-500/70 italic">[Falta asignar Rep. Legal]</span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <span className="block text-xs text-on-surface-variant opacity-60">Profesión</span>
-                  <span className="font-semibold text-on-surface">{actor.profession}</span>
-                </div>
-                <div>
-                  <span className="block text-xs text-on-surface-variant opacity-60">Empleador</span>
-                  <span className="font-semibold text-on-surface">{actor.employer}</span>
-                </div>
-                {actor.representedCompanyId && (
-                  <div>
-                    <span className="block text-xs text-on-surface-variant opacity-60">Empresa Representada</span>
-                    <button 
-                      onClick={() => navigate(`/actor/${actor.representedCompanyId}`)}
-                      className="group flex items-center gap-2 font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer text-left"
-                    >
-                      {actor.representedCompanyName}
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  </div>
+        {/* Datos de Origen - Only for Legal Entities */}
+        {actor.nature === 'Jurídica' && (
+          <div className="bg-surface-container-low rounded-xl p-6">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-4">Datos de Origen</h3>
+            <div className={cn(
+              "grid gap-6",
+              "grid-cols-1 md:grid-cols-2"
+            )}>
+              <div>
+                <span className="block text-xs text-on-surface-variant opacity-60">Tipo Entidad</span>
+                <span className="font-semibold text-on-surface">{actor.entityType}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-on-surface-variant opacity-60">Representante Legal</span>
+                {actor.legalRepresentatives && actor.legalRepresentatives.length > 0 ? (
+                  <button 
+                    onClick={() => navigate(`/actor/${actor.legalRepresentatives![0].id}`)}
+                    className="group flex items-center gap-2 font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer text-left"
+                  >
+                    {actor.legalRepresentatives[0].name}
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                ) : (
+                  <span className="text-sm font-medium text-red-500/70 italic">[Falta asignar Rep. Legal]</span>
                 )}
-              </>
-            )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
 
         {/* Documentación */}
         <div id="documentacion" ref={docSectionRef} className="space-y-4 scroll-mt-20">

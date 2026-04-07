@@ -8,21 +8,24 @@ import {
   Edit3, 
   Trash2, 
   Building2, 
-  User,
+  MapPin,
   TrendingUp,
-  Verified,
-  ArrowRight,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  ArrowRight,
+  Home,
+  AlertCircle,
+  CheckCircle2,
+  Verified
 } from 'lucide-react';
-import { useActors } from '../context/ActorContext';
-import { StatusBadge } from '../components/StatusBadge';
-import { cn, normalizeRut } from '../lib/utils';
-import { ConfirmationModal } from '../components/ConfirmationModal';
+import { MOCK_PROPERTIES } from '../../PropiedadesMocks';
+import { Property, PropertyStatus } from '../../types/Property';
+import { cn } from '../../lib/utils';
+import { ConfirmationModal } from '../../components/ConfirmationModal';
 
-export const ActorList = () => {
+export const PropiedadesDashboard = () => {
   const navigate = useNavigate();
-  const { actors: MOCK_ACTORS } = useActors();
+  const [properties, setProperties] = useState<Property[]>(MOCK_PROPERTIES);
   const [activeTab, setActiveTab] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +44,7 @@ export const ActorList = () => {
     setIsConfirmModalOpen(true);
   };
 
-  // Listen for search query from TopBar
+  // Listen for search query from TopBar (Smart Search)
   useEffect(() => {
     const handleSmartSearch = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -69,31 +72,28 @@ export const ActorList = () => {
       : <ChevronDown className="w-3 h-3 text-primary" />;
   };
 
-  const filteredActors = [...MOCK_ACTORS].filter(actor => {
+  const filteredProperties = [...properties].filter(prop => {
     // Tab filter
     const matchesTab = 
       activeTab === 'Todos' || 
-      (activeTab === 'Activos' && actor.status === 'Activo') ||
-      (activeTab === 'Pendientes' && actor.status === 'Pendiente') ||
-      (activeTab === 'Bloqueados' && actor.status === 'Bloqueado') ||
-      (activeTab === 'Archivados' && actor.status === 'Archivado');
+      (activeTab === 'Disponibles' && prop.status === 'Disponible') ||
+      (activeTab === 'Pendientes' && prop.status === 'Pendiente') ||
+      (activeTab === 'Arrendadas' && prop.status === 'Arrendada') ||
+      (activeTab === 'Inactivas' && prop.status === 'Inactiva');
     
     // Search filter
-    const normalizedQuery = normalizeRut(searchQuery);
-    const normalizedActorRut = normalizeRut(actor.rut);
-    
     const matchesSearch = 
-      actor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      normalizedActorRut.includes(normalizedQuery) ||
-      actor.email.toLowerCase().includes(searchQuery.toLowerCase());
+      prop.fantasyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prop.siiRol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prop.address.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesTab && matchesSearch;
   }).sort((a, b) => {
     if (!sortConfig) return 0;
     
     const { key, direction } = sortConfig;
-    let valA = a[key as keyof typeof a];
-    let valB = b[key as keyof typeof b];
+    let valA = a[key as keyof Property];
+    let valB = b[key as keyof Property];
 
     if (valA === undefined) valA = '';
     if (valB === undefined) valB = '';
@@ -107,23 +107,19 @@ export const ActorList = () => {
     return 0;
   });
 
-  // Calculate counts based on search query for each tab
   const getCountForTab = (tabLabel: string) => {
-    return MOCK_ACTORS.filter(actor => {
+    return properties.filter(prop => {
       const matchesTab = 
         tabLabel === 'Todos' || 
-        (tabLabel === 'Activos' && actor.status === 'Activo') ||
-        (tabLabel === 'Pendientes' && actor.status === 'Pendiente') ||
-        (tabLabel === 'Bloqueados' && actor.status === 'Bloqueado') ||
-        (tabLabel === 'Archivados' && actor.status === 'Archivado');
-      
-      const normalizedQuery = normalizeRut(searchQuery);
-      const normalizedActorRut = normalizeRut(actor.rut);
+        (tabLabel === 'Disponibles' && prop.status === 'Disponible') ||
+        (tabLabel === 'Pendientes' && prop.status === 'Pendiente') ||
+        (tabLabel === 'Arrendadas' && prop.status === 'Arrendada') ||
+        (tabLabel === 'Inactivas' && prop.status === 'Inactiva');
       
       const matchesSearch = 
-        actor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        normalizedActorRut.includes(normalizedQuery) ||
-        actor.email.toLowerCase().includes(searchQuery.toLowerCase());
+        prop.fantasyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prop.siiRol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prop.address.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesTab && matchesSearch;
     }).length;
@@ -131,10 +127,10 @@ export const ActorList = () => {
 
   const tabs = [
     { label: 'Todos', count: getCountForTab('Todos') },
-    { label: 'Activos', count: getCountForTab('Activos') },
+    { label: 'Disponibles', count: getCountForTab('Disponibles') },
     { label: 'Pendientes', count: getCountForTab('Pendientes') },
-    { label: 'Bloqueados', count: getCountForTab('Bloqueados') },
-    { label: 'Archivados', count: getCountForTab('Archivados') },
+    { label: 'Arrendadas', count: getCountForTab('Arrendadas') },
+    { label: 'Inactivas', count: getCountForTab('Inactivas') },
   ];
 
   const handleTabChange = (tabLabel: string) => {
@@ -145,17 +141,29 @@ export const ActorList = () => {
   // Effect to handle "Todo" mode when filtered list changes
   useEffect(() => {
     if (paginationMode === 'Todo') {
-      setItemsPerPage(filteredActors.length || 1);
+      setItemsPerPage(filteredProperties.length || 1);
     }
-  }, [filteredActors.length, paginationMode]);
+  }, [filteredProperties.length, paginationMode]);
 
-  const paginatedActors = filteredActors.slice(
+  const paginatedProperties = filteredProperties.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  // Metrics Calculations
+  const totalProperties = properties.length;
+  const leasedCount = properties.filter(p => p.status === 'Arrendada').length;
+  const occupancyRate = totalProperties > 0 ? Math.round((leasedCount / totalProperties) * 100) : 0;
+  const pendingCount = properties.filter(p => p.status === 'Pendiente').length;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Breadcrumbs - Now handled by Layout/TopBar, but keeping layout symmetry */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-headline font-extrabold text-on-surface tracking-tight">Directorio de Propiedades</h1>
+        <p className="text-on-surface-variant text-sm font-medium">Gestiona tu cartera de inmuebles, estados y documentación legal.</p>
+      </div>
+
       {/* Unified Filter and Actions Section */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         {/* Tabs Group */}
@@ -182,18 +190,17 @@ export const ActorList = () => {
           ))}
         </div>
 
-        {/* Actions Group */}
+        {/* Actions Group - Search input removed to avoid duplication with TopBar */}
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors bg-white rounded-xl border border-outline-variant/10">
             <Download className="w-4 h-4" />
             Exportar
           </button>
           <button 
-            onClick={() => navigate('/register')}
             className="px-5 py-2.5 primary-gradient text-white text-sm font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-primary/10 hover:opacity-90 transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            Agregar Actor
+            Nueva Propiedad
           </button>
         </div>
       </div>
@@ -204,28 +211,28 @@ export const ActorList = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-low/50">
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Nombre del Actor</th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">RUT / ID</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Nombre / Fantasía</th>
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Rol SII</th>
                 <th 
-                  onClick={() => requestSort('nature')} 
+                  onClick={() => requestSort('type')}
                   className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant text-center cursor-pointer hover:bg-surface-container-high transition-colors"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    Tipo de Entidad
-                    {renderSortIcon('nature')}
+                    Tipo
+                    {renderSortIcon('type')}
                   </div>
                 </th>
                 <th 
-                  onClick={() => requestSort('mainRole')} 
+                  onClick={() => requestSort('commune')}
                   className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
                 >
                   <div className="flex items-center gap-1">
-                    Rol Principal
-                    {renderSortIcon('mainRole')}
+                    Comuna
+                    {renderSortIcon('commune')}
                   </div>
                 </th>
                 <th 
-                  onClick={() => requestSort('status')} 
+                  onClick={() => requestSort('status')}
                   className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
                 >
                   <div className="flex items-center gap-1">
@@ -237,58 +244,67 @@ export const ActorList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
-              {paginatedActors.map((actor) => (
-                <tr key={actor.id} className="group hover:bg-surface-container-low transition-colors duration-200 cursor-pointer" onClick={() => navigate(`/actor/${actor.id}`)}>
+              {paginatedProperties.map((prop) => (
+                <tr key={prop.id} className="group hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
                   <td className="px-6 py-4">
-                    <div>
-                      <p className="text-sm font-bold text-on-surface">{actor.name}</p>
-                      <p className="text-[11px] text-on-surface-variant">{actor.email}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                        <Home className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-on-surface">{prop.fantasyName}</p>
+                        <p className="text-[11px] text-on-surface-variant flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {prop.address}
+                        </p>
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-on-surface">{actor.rut}</span>
+                    <span className="text-sm font-mono font-medium text-on-surface">{prop.siiRol}</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold",
-                      actor.nature === 'Jurídica' ? "bg-primary-fixed text-on-primary-fixed-variant" : "bg-secondary-container text-on-secondary-container"
-                    )}>
-                      {actor.nature === 'Jurídica' ? <Building2 className="w-3 h-3" /> : <User className="w-3 h-3" />}
-                      {actor.nature}
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold bg-secondary-container text-on-secondary-container">
+                      {prop.type}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-medium text-secondary">{actor.mainRole}</span>
+                    <span className="text-xs font-medium text-secondary">{prop.commune}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">
                         <span className={cn("w-1.5 h-1.5 rounded-full", 
-                          actor.status === 'Activo' ? "bg-teal-500" : 
-                          actor.status === 'Pendiente' ? "bg-amber-500" : 
-                          actor.status === 'Archivado' ? "bg-slate-500" : "bg-red-500"
+                          prop.status === 'Disponible' ? "bg-teal-500" : 
+                          prop.status === 'Pendiente' ? "bg-amber-500" : 
+                          prop.status === 'Arrendada' ? "bg-blue-500" : "bg-red-500"
                         )}></span>
                         <span className={cn("text-xs font-bold",
-                          actor.status === 'Activo' ? "text-teal-700" : 
-                          actor.status === 'Pendiente' ? "text-amber-700" : 
-                          actor.status === 'Archivado' ? "text-slate-700" : "text-red-700"
-                        )}>{actor.status}</span>
+                          prop.status === 'Disponible' ? "text-teal-700" : 
+                          prop.status === 'Pendiente' ? "text-amber-700" : 
+                          prop.status === 'Arrendada' ? "text-blue-700" : "text-red-700"
+                        )}>{prop.status}</span>
                       </div>
-                      {actor.status === 'Pendiente' && <span className="text-[10px] text-amber-700/70 italic">Falta validación de RUT</span>}
+                      {prop.status === 'Pendiente' && (
+                        <span className="text-[10px] text-amber-700/70 italic flex items-center gap-1 mt-0.5">
+                          <AlertCircle className="w-2.5 h-2.5" />
+                          Faltan documentos críticos
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => navigate(`/actor/${actor.id}`)} className="p-2 hover:bg-secondary-container rounded-md text-on-secondary-container transition-colors" title="Ver Detalle del Actor">
+                      <button className="p-2 hover:bg-secondary-container rounded-md text-on-secondary-container transition-colors" title="Ver Detalle">
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button onClick={() => navigate(`/actor/${actor.id}/edit`, { state: { actor } })} className="p-2 hover:bg-secondary-container rounded-md text-on-secondary-container transition-colors" title="Editar Actor">
+                      <button className="p-2 hover:bg-secondary-container rounded-md text-on-secondary-container transition-colors" title="Editar">
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => triggerConfirm(() => console.log('Actor eliminado'))}
+                        onClick={() => triggerConfirm(() => console.log('Propiedad eliminada'))}
                         className="p-2 hover:bg-error-container rounded-md text-error transition-colors" 
-                        title="Eliminar Actor"
+                        title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -300,7 +316,7 @@ export const ActorList = () => {
           </table>
         </div>
         
-        {/* Pagination & Data Density Control */}
+        {/* Full Pagination & Data Density Control - Exact Symmetry with Actores */}
         <div className="px-6 py-5 bg-surface-container-low/30 border-t border-outline-variant/10 flex flex-col lg:flex-row items-center justify-between gap-6 font-sans">
           <div className="flex flex-wrap items-center gap-8">
             <div className="flex items-center gap-4">
@@ -312,7 +328,7 @@ export const ActorList = () => {
                     onClick={() => {
                       setPaginationMode(mode as any);
                       if (mode === 'Todo') {
-                        setItemsPerPage(filteredActors.length || 1);
+                        setItemsPerPage(filteredProperties.length || 1);
                       } else {
                         setItemsPerPage(parseInt(mode));
                       }
@@ -334,11 +350,11 @@ export const ActorList = () => {
           
           <div className="flex items-center gap-6">
             <p className="text-xs text-on-surface-variant font-medium">
-              {filteredActors.length > 0 ? (
+              {filteredProperties.length > 0 ? (
                 <>
-                  Mostrando <span className="font-bold text-on-surface">{paginationMode === 'Todo' ? 1 : (currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-bold text-on-surface">{Math.min(currentPage * itemsPerPage, filteredActors.length)}</span> de <span className="font-bold text-on-surface">{filteredActors.length}</span> actores
+                  Mostrando <span className="font-bold text-on-surface">{paginationMode === 'Todo' ? 1 : (currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-bold text-on-surface">{Math.min(currentPage * itemsPerPage, filteredProperties.length)}</span> de <span className="font-bold text-on-surface">{filteredProperties.length}</span> propiedades
                   <span className="mx-3 text-outline-variant/50">|</span>
-                  Página <span className="font-bold text-on-surface">{currentPage}</span> de <span className="font-bold text-on-surface">{Math.ceil(filteredActors.length / itemsPerPage) || 1}</span>
+                  Página <span className="font-bold text-on-surface">{currentPage}</span> de <span className="font-bold text-on-surface">{Math.ceil(filteredProperties.length / itemsPerPage) || 1}</span>
                 </>
               ) : (
                 "No se encontraron resultados"
@@ -361,10 +377,10 @@ export const ActorList = () => {
               
               <button 
                 onClick={() => setCurrentPage(prev => prev + 1)}
-                disabled={currentPage * itemsPerPage >= filteredActors.length || paginationMode === 'Todo'}
+                disabled={currentPage * itemsPerPage >= filteredProperties.length || paginationMode === 'Todo'}
                 className={cn(
                   "p-2 rounded-lg bg-white border border-outline-variant/30 transition-all shadow-sm",
-                  (currentPage * itemsPerPage >= filteredActors.length || paginationMode === 'Todo')
+                  (currentPage * itemsPerPage >= filteredProperties.length || paginationMode === 'Todo')
                     ? "opacity-30 cursor-not-allowed" 
                     : "text-on-surface-variant hover:text-cyan-900 hover:border-cyan-900 hover:shadow-md active:scale-95"
                 )}
@@ -376,36 +392,42 @@ export const ActorList = () => {
         </div>
       </div>
 
-      {/* Quick Insights */}
+      {/* Metrics Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-primary-container p-6 rounded-2xl relative overflow-hidden group">
+        <div className="bg-cyan-900 p-6 rounded-2xl relative overflow-hidden group shadow-lg shadow-cyan-900/10">
           <div className="relative z-10">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/80 mb-1">Crecimiento</p>
-            <h4 className="text-2xl font-bold text-white font-headline">+12</h4>
-            <p className="text-sm text-white/70 mt-4">Nuevos actores registrados este mes</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/80 mb-1">Total Propiedades</p>
+            <h4 className="text-3xl font-bold text-white font-headline">{totalProperties}</h4>
+            <p className="text-sm text-white/60 mt-4 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-white/40" />
+              Patrimonio inmobiliario bajo gestión
+            </p>
           </div>
-          <TrendingUp className="absolute -bottom-4 -right-4 w-32 h-32 text-white/5 rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+          <Building2 className="absolute -bottom-4 -right-4 w-32 h-32 text-white/5 rotate-12 group-hover:rotate-0 transition-transform duration-500" />
         </div>
 
-        <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/15 flex flex-col justify-between">
+        <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/15 flex flex-col justify-between shadow-sm">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Balance de Portafolio</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">% de Ocupación</p>
             <div className="flex items-end gap-2">
-              <h4 className="text-2xl font-bold text-on-surface font-headline">65%</h4>
-              <span className="text-xs text-teal-600 font-medium mb-1">Entidades Jurídicas</span>
+              <h4 className="text-3xl font-bold text-on-surface font-headline">{occupancyRate}%</h4>
+              <span className="text-xs text-blue-600 font-bold mb-1">Arrendadas</span>
             </div>
           </div>
-          <div className="w-full bg-surface-container-high h-1.5 rounded-full mt-6 overflow-hidden">
-            <div className="bg-primary h-full rounded-full" style={{ width: '65%' }}></div>
+          <div className="w-full bg-surface-container-high h-2 rounded-full mt-6 overflow-hidden">
+            <div className="bg-blue-500 h-full rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }}></div>
           </div>
         </div>
 
-        <div className="bg-secondary-container/30 p-6 rounded-2xl border border-outline-variant/15 flex flex-col justify-between">
+        <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex flex-col justify-between shadow-sm">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-secondary-container mb-1">Fidelidad de Cartera</p>
-            <h4 className="text-2xl font-bold text-on-secondary-container font-headline">2.4 Años</h4>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-800 mb-1">Propiedades Pendientes</p>
+              <AlertCircle className="w-4 h-4 text-amber-500" />
+            </div>
+            <h4 className="text-3xl font-bold text-amber-900 font-headline">{pendingCount}</h4>
           </div>
-          <p className="text-xs text-on-secondary-container mt-4 font-sans">Tiempo promedio de permanencia de actores en el sistema.</p>
+          <p className="text-xs text-amber-800/70 mt-4 font-medium leading-relaxed">Requieren regularización de documentos críticos para ser comercializadas.</p>
         </div>
       </div>
 

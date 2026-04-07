@@ -11,6 +11,7 @@ export const Layout = () => {
   const getBreadcrumbs = () => {
     const path = location.pathname;
     if (path === '/') return [{ label: 'Actores' }, { label: 'Directorio' }];
+    if (path === '/properties') return [{ label: 'Propiedades' }, { label: 'Directorio' }];
     if (path.startsWith('/actor/')) {
       if (path.endsWith('/history')) {
         const actorId = path.split('/')[2];
@@ -27,13 +28,16 @@ export const Layout = () => {
     return [{ label: 'Actores', href: '/' }];
   };
 
+  const isPropertiesPage = location.pathname === '/properties';
+
   return (
     <div className="min-h-screen bg-surface">
       <Sidebar />
       <main className="md:ml-64 min-h-screen flex flex-col">
         <TopBar 
           breadcrumbs={getBreadcrumbs()} 
-          showSearch={location.pathname === '/'} 
+          showSearch={location.pathname === '/' || isPropertiesPage}
+          searchPlaceholder={isPropertiesPage ? "Filtrar por nombre, Rol SII o dirección..." : undefined}
         />
         <div className="px-6 md:px-12 py-8 flex-1">
           <Outlet />

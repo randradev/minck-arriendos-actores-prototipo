@@ -16,7 +16,7 @@ export const Sidebar = () => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Users, label: 'Actores', href: '/' },
-    { icon: Building2, label: 'Entidades', href: '/entities' },
+    { icon: Building2, label: 'Propiedades', href: '/properties' },
     { icon: BarChart3, label: 'Reportes', href: '/reports' },
     { icon: Settings, label: 'Configuración', href: '/settings' },
   ];

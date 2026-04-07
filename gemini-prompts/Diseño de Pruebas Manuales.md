@@ -52,7 +52,7 @@ Este documento detalla los escenarios de prueba para validar la funcionalidad, i
 
 ### Escenario 3.1: Cambio de Naturaleza
 *   **Acción:** En el formulario de registro, cambiar de "Persona Natural" a "Persona Jurídica".
-*   **Resultado Esperado:** Los campos de "Profesión" y "Empleador" deben desaparecer, y deben mostrarse los campos de "Tipo de Empresa" y "Representante Legal".
+*   **Resultado Esperado:** El campo de "Profesión" debe desaparecer, y deben mostrarse los campos de "Tipo de Empresa" y "Representante Legal".
 
 ### Escenario 3.2: Consistencia de Representación Legal
 *   **Acción:** Ver el perfil de "Inversiones Los Andes SpA".

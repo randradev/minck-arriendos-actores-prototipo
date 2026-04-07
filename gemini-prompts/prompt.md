@@ -10,7 +10,7 @@ ContractStatus: 'Vigente' | 'Finalizado' | 'En Prórroga'
 DocumentStatus: 'Pendiente' | 'Aprobado' | 'Rechazado'
 2. Reglas de Entidad (Actor):
 Cada Actor debe tener campos específicos según su naturaleza:
-Si es 'Natural': Debe incluir obligatoriamente profession (profesión) y employer (empleador). No debe tener campos de empresa.
+Si es 'Natural': Debe incluir obligatoriamente profession (profesión). No debe tener campos de empresa.
 Si es 'Jurídica': Debe incluir entityType (ej: SpA, Ltda, S.A.), legalRepresentativeId (ID de otro actor) y legalRepresentativeName.
 Roles: Un actor tiene un mainRole (rol principal) y una lista de roles (puede tener varios, ej: ['Arrendador', 'Representante Legal']).
 Identificación (RUT): El RUT debe seguir el formato chileno: XX.XXX.XXX-X.
@@ -44,7 +44,6 @@ interface Actor {
   mainRole: ActorRole;
   roles: ActorRole[];
   profession?: string; // Solo Natural
-  employer?: string;   // Solo Natural
   entityType?: string; // Solo Jurídica
   legalRepresentativeId?: string; // Solo Jurídica
   legalRepresentativeName?: string; // Solo Jurídica

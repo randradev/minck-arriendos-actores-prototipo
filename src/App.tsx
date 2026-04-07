@@ -12,6 +12,7 @@ import { ActorEdit } from './views/ActorEdit';
 import { Notifications } from './views/Notifications';
 import { ActorHistory } from './views/ActorHistory';
 import { Settings } from './views/Settings';
+import { PropiedadesDashboard } from './views/properties/PropiedadesDashboard';
 import { ActorProvider } from './context/ActorContext';
 
 const Placeholder = ({ title }: { title: string }) => (
@@ -34,7 +35,7 @@ export default function App() {
             <Route path="actor/:id/edit" element={<ActorEdit />} />
             <Route path="notificaciones" element={<Notifications />} />
             <Route path="dashboard" element={<Placeholder title="Dashboard" />} />
-            <Route path="entities" element={<Placeholder title="Entidades" />} />
+            <Route path="properties" element={<PropiedadesDashboard />} />
             <Route path="reports" element={<Placeholder title="Reportes" />} />
             <Route path="settings" element={<Settings />} />
           </Route>

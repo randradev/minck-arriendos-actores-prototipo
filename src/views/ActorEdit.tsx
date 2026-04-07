@@ -62,7 +62,6 @@ export const ActorEdit = () => {
     phone: '',
     website: '',
     profession: '',
-    employer: '',
     entityType: ''
   });
 
@@ -74,7 +73,6 @@ export const ActorEdit = () => {
         phone: actor.phone,
         website: actor.website || '',
         profession: actor.profession || '',
-        employer: actor.employer || '',
         entityType: actor.entityType || (actor.nature === 'Natural' ? 'Persona Natural' : 'Sociedad por Acciones (SpA)')
       });
     }
@@ -398,9 +396,9 @@ export const ActorEdit = () => {
                 </div>
               ) : (
                 <>
-                  <div className="space-y-2">
+                  <div className="space-y-2 col-span-2">
                     <label className="text-[0.75rem] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                      Profesión u oficio
+                      Profesión
                       {isDirty('profession') && (
                         <span className="flex items-center gap-1 text-amber-600 animate-in fade-in zoom-in duration-200">
                           <Edit3 className="w-3 h-3" />
@@ -416,39 +414,11 @@ export const ActorEdit = () => {
                         type="text" 
                         value={formData.profession}
                         onChange={(e) => setFormData({...formData, profession: e.target.value})}
+                        placeholder="Ej: Abogada"
                       />
                       {isDirty('profession') && (
                         <button 
                           onClick={() => handleReset('profession')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[0.75rem] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                      Empleador
-                      {isDirty('employer') && (
-                        <span className="flex items-center gap-1 text-amber-600 animate-in fade-in zoom-in duration-200">
-                          <Edit3 className="w-3 h-3" />
-                        </span>
-                      )}
-                    </label>
-                    <div className="relative">
-                      <input 
-                        className={cn(
-                          "w-full bg-surface-container-low border-none border-b-2 focus:border-primary focus:ring-0 rounded-t-xl px-4 py-3 text-on-surface transition-all",
-                          isDirty('employer') ? "border-amber-400 bg-amber-50/30" : "border-transparent"
-                        )}
-                        type="text" 
-                        value={formData.employer}
-                        onChange={(e) => setFormData({...formData, employer: e.target.value})}
-                      />
-                      {isDirty('employer') && (
-                        <button 
-                          onClick={() => handleReset('employer')}
                           className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
@@ -492,14 +462,14 @@ export const ActorEdit = () => {
                     <User className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="font-bold text-on-surface">{actor.legalRepresentativeName}</p>
-                    <p className="text-xs text-on-surface-variant">RUT: 15.882.341-0</p>
+                    <p className="font-bold text-on-surface">{actor.legalRepresentatives?.[0]?.name || '[Sin Representante]'}</p>
+                    <p className="text-xs text-on-surface-variant">RUT: {actor.legalRepresentatives?.[0]?.rut || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
-                    onClick={() => actor.legalRepresentativeId && navigate(`/actor/${actor.legalRepresentativeId}`)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-on-surface text-sm font-bold shadow-sm border border-outline-variant hover:bg-surface-container-low transition-colors"
+                    onClick={() => actor.legalRepresentatives?.[0]?.id && navigate(`/actor/${actor.legalRepresentatives[0].id}`)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-on-surface text-sm font-bold shadow-sm border border-outline-variant hover:bg-surface-container-low transition-all cursor-pointer"
                   >
                     <Eye className="w-4 h-4" />
                     Ver Ficha
@@ -512,70 +482,6 @@ export const ActorEdit = () => {
               </div>
             </section>
           )}
-
-          {/* Section: Estado Operativo */}
-          <section className="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/10">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                  <Shield className="w-4 h-4" />
-                </div>
-                <h3 className="text-xl font-bold font-headline">Estado Operativo</h3>
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex flex-col items-center">
-                <div className={cn(
-                  "flex items-center gap-3 px-8 py-3 rounded-full border-2 shadow-sm",
-                  actor.status === 'Activo' ? "bg-green-100 border-green-500 text-green-800" : "bg-red-100 border-red-500 text-red-800"
-                )}>
-                  {actor.status === 'Activo' ? <CheckCircle2 className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
-                  <span className="text-lg font-extrabold uppercase tracking-widest font-headline">{actor.status}</span>
-                </div>
-                <p className="mt-4 text-center text-on-surface-variant text-sm font-medium max-w-md">
-                  {actor.status === 'Activo' 
-                    ? "Entidad operativa con cumplimiento legal al día y sin deudas registradas."
-                    : "El sistema ha restringido la operación debido a una mora pendiente de $450.000."
-                  }
-                </p>
-              </div>
-              
-              <div className="w-full max-w-sm space-y-3 bg-surface-container-low/50 p-6 rounded-2xl border border-outline-variant/30">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-on-surface">Documentación</span>
-                  <div className="flex items-center gap-2 text-green-700">
-                    <span className="text-xs font-bold">Al día</span>
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-on-surface">Estado Financiero</span>
-                  <div className={cn("flex items-center gap-2", actor.status === 'Activo' ? "text-green-700" : "text-error")}>
-                    <span className="text-xs font-bold">{actor.status === 'Activo' ? 'Al día' : 'Mora detectada'}</span>
-                    {actor.status === 'Activo' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-on-surface">Vigencia Legal</span>
-                  <div className="flex items-center gap-2 text-green-700">
-                    <span className="text-xs font-bold">Poderes vigentes</span>
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center gap-2 px-10 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-md hover:bg-primary-container transition-all active:scale-95"
-              >
-                <Shield className="w-5 h-5" />
-                Gestionar Estado
-              </button>
-              <p className="text-[10px] text-outline font-bold uppercase tracking-widest">
-                Última actualización: 26 Mar 2026 por Sistema (Automático)
-              </p>
-            </div>
-          </section>
 
           {/* Impact Summary */}
           <div className="p-4 bg-surface-container-low rounded-2xl flex items-center gap-4 border border-outline-variant/30">
@@ -591,6 +497,57 @@ export const ActorEdit = () => {
 
         {/* Sidebar Column */}
         <div className="col-span-12 lg:col-span-4 space-y-8">
+          {/* Section: Estado Operativo */}
+          <section className="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/10">
+            <h4 className="text-sm font-bold font-headline uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Estado Operativo
+            </h4>
+            
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col items-center">
+                <div className={cn(
+                  "flex items-center gap-2 px-4 py-1.5 rounded-full border-2",
+                  actor.status === 'Activo' ? "bg-green-100 border-green-500 text-green-800" : "bg-red-100 border-red-500 text-red-800"
+                )}>
+                  {actor.status === 'Activo' ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                  <span className="text-sm font-extrabold uppercase tracking-widest font-headline">{actor.status}</span>
+                </div>
+                <p className="mt-3 text-center text-on-surface-variant text-[11px] font-medium leading-relaxed">
+                  {actor.status === 'Activo' 
+                    ? "Entidad operativa con cumplimiento legal al día."
+                    : "Restricción operativa por mora pendiente de $450.000."
+                  }
+                </p>
+              </div>
+              
+              <div className="w-full space-y-3 bg-surface-container-low/50 p-4 rounded-xl border border-outline-variant/30">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-on-surface">Documentos</span>
+                  <div className="flex items-center gap-1.5 text-green-700">
+                    <span className="text-[10px] font-bold">Al día</span>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-on-surface">Financiero</span>
+                  <div className={cn("flex items-center gap-1.5", actor.status === 'Activo' ? "text-green-700" : "text-error")}>
+                    <span className="text-[10px] font-bold">{actor.status === 'Activo' ? 'Al día' : 'Mora'}</span>
+                    {actor.status === 'Activo' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setIsDrawerOpen(true)}
+                className="w-full flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-md hover:bg-primary-container transition-all"
+              >
+                <Shield className="w-4 h-4" />
+                Gestionar Estado
+              </button>
+            </div>
+          </section>
+
           {/* Historial de Registro */}
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-outline-variant/10">
             <h4 className="text-sm font-bold font-headline uppercase tracking-widest text-on-surface-variant mb-6">Historial de Registro</h4>
